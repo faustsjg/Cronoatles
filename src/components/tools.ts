@@ -18,6 +18,7 @@ ensureEl("toolsContent").addEventListener("click", event => {
   else if (buttonId === "editHeightmapButton") void Controllers.HeightmapEditor.open();
   else if (buttonId === "editBiomesButton") void Controllers.BiomesEditor.open();
   else if (buttonId === "editStatesButton") void Controllers.StatesEditor.open();
+  else if (buttonId === "editErasButton") void Controllers.ErasEditor.open();
   else if (buttonId === "editProvincesButton") void Controllers.ProvincesEditor.open();
   else if (buttonId === "editDiplomacyButton") void Controllers.DiplomacyEditor.open();
   else if (buttonId === "editCoastlineSettings") void Controllers.CoastlineEditor.open();
