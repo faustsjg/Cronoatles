@@ -14,6 +14,7 @@ import "./biomes-generator";
 import "./cultures-generator";
 import "./routes-generator";
 import "./states-generator";
+import "./eras-generator";
 import "./zones-generator";
 import "./religions-generator";
 import "./labels-generator";

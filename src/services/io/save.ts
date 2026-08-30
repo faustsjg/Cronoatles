@@ -122,6 +122,7 @@ function prepareMapData(): string {
   const provinces = JSON.stringify(pack.provinces);
   const rivers = JSON.stringify(pack.rivers);
   const relief = JSON.stringify(pack.relief || []);
+  const eras = JSON.stringify(pack.eras || []);
   const markers = JSON.stringify(pack.markers);
   const cellRoutes = JSON.stringify(pack.cells.routes);
   const routes = JSON.stringify(pack.routes);
@@ -205,7 +206,8 @@ function prepareMapData(): string {
     styleData,
     relief,
     layers,
-    graphOverride
+    graphOverride,
+    eras
   ].join("\r\n");
   return mapData;
 }
