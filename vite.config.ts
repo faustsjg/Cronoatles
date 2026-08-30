@@ -16,7 +16,14 @@ const stripWebOnlyTags = {
 
 export default ({ mode }: { mode: string }) => ({
   root: "./src",
-  base: mode === "electron" ? "./" : process.env.NETLIFY ? "/" : "/Fantasy-Map-Generator/",
+  base:
+    mode === "electron"
+      ? "./"
+      : process.env.NETLIFY
+        ? "/"
+        : process.env.GITHUB_PAGES
+          ? "/Cronoatles/"
+          : "/Fantasy-Map-Generator/",
   plugins: mode === "electron" ? [stripWebOnlyTags] : [],
   build: {
     outDir: mode === "electron" ? "../dist-electron/renderer" : "../dist",
