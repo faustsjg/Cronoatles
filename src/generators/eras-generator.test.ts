@@ -36,7 +36,7 @@ describe("ErasModule.generate", () => {
 
     globalThis.window = globalThis.window || ({} as any);
     regenerate = vi.fn();
-    globalThis.window.States = { regenerate } as any;
+    globalThis.window.States = { regenerate, getFullName: (s: any) => s.name } as any;
 
     globalThis.options = { year: 1000 } as any;
     globalThis.pack = {
@@ -92,5 +92,27 @@ describe("ErasModule.generate", () => {
     ErasModule.generate(2, 100);
     const capital = globalThis.pack.burgs.find((b: any) => b.capital);
     expect(capital?.removed).toBeUndefined();
+  });
+
+  it("mutates a surviving state's name and keeps fullName in sync, when P() always succeeds", () => {
+    ErasModule.generate(2, 100);
+    // "Small" contains "ll", a rule toponym-drift always applies when it matches
+    expect(globalThis.pack.states[2].name).toBe("Smal");
+    expect(globalThis.pack.states[2].fullName).toBe("Smal");
+  });
+
+  it("mutates a surviving burg's name, capitals included, when P() always succeeds", () => {
+    globalThis.pack.burgs[1].name = "Small Port"; // the capital burg
+    ErasModule.generate(2, 100);
+    expect(globalThis.pack.burgs[1].name).toBe("Smal Port");
+  });
+
+  it("leaves names and locks untouched when P() always fails", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
+    ErasModule.generate(2, 100);
+    expect(globalThis.pack.states[1].lock).toBe(false);
+    expect(globalThis.pack.states[2].lock).toBe(false);
+    expect(globalThis.pack.states[1].name).toBe("Big");
+    expect(globalThis.pack.states[2].name).toBe("Small");
   });
 });

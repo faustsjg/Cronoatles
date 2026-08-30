@@ -1,5 +1,6 @@
 import { sum } from "d3";
 import type { State } from "@/generators/states-generator";
+import { mutateName } from "@/generators/toponym-drift";
 import { minmax, P } from "../utils";
 
 declare global {
@@ -60,13 +61,28 @@ class ErasModule {
     const totalArea = sum(validStates.map(s => s.area ?? 0)) || 1;
     for (const state of validStates) {
       state.lock = P(survivalChance(state.area ?? 0, totalArea, validStates.length));
+
+      // States.defineStateForms() skips locked states, so a surviving name
+      // only drifts here; fullName is recomputed from the mutated name and
+      // the untouched form (Kingdom, Duchy...) it already carried.
+      if (state.lock && P(0.35)) {
+        state.name = mutateName(state.name);
+        state.fullName = window.States.getFullName(state);
+      }
     }
 
     // small, non-capital settlements have a chance to be abandoned each era;
-    // burgs.capital markers are never pruned directly
+    // capitals are never pruned, but their name can still drift like any
+    // other surviving burg (this is exactly the Barcino -> Barcelona case).
     for (const burg of burgs) {
-      if (!burg.i || burg.removed || burg.capital) continue;
-      if ((burg.population ?? 0) < 3 && P(0.15)) burg.removed = true;
+      if (!burg.i || burg.removed) continue;
+
+      if (!burg.capital && (burg.population ?? 0) < 3 && P(0.15)) {
+        burg.removed = true;
+        continue;
+      }
+
+      if (P(0.2)) burg.name = mutateName(burg.name ?? "");
     }
   }
 }
