@@ -1,79 +1,79 @@
-# Cronoatles — briefing del projecte
+# Cronoatles — project briefing
 
-Document per posar Claude Code al dia. Enganxa'l al repo com a BRIEFING.md o passa'l com a context a la primera sessió.
+Document to bring Claude Code up to speed. Paste it into the repo as BRIEFING.md, or pass it as context in the first session.
 
-## Què construïm
+## What we're building
 
-Un fork del Fantasy Map Generator d'Azgaar que hi afegeix una dimensió temporal: la mateixa geografia vista al llarg de segles, amb civilitzacions que neixen, s'expandeixen, xoquen i cauen. L'usuari té una barra de temps: pot reproduir l'evolució com un vídeo, aturar-la en qualsevol any i fer zoom.
+A fork of Azgaar's Fantasy Map Generator that adds a temporal dimension: the same geography seen across centuries, with civilizations that rise, expand, clash, and fall. The user gets a time bar: they can play back the evolution like a video, pause it at any year, and zoom in.
 
-Referència visual: els atles històrics animats tipus Euratlas/GeaCron — mapa de to pergamí, fronteres com a tinta, etiquetes serif que creixen amb l'extensió de l'imperi. Aquells mapes estan dibuixats a mà; el nostre ha de sortir generat.
+Visual reference: animated historical atlases like Euratlas/GeaCron — parchment-toned map, ink-like borders, serif labels that grow with the empire's extent. Those maps are hand-drawn; ours has to come out generated.
 
-Fora d'abast (per ara): zoom 3D fins al carrer, assets, motors de joc. Tot es queda en 2D vectorial, que és el que permet que tot sigui procedural.
+Out of scope (for now): street-level 3D zoom, assets, game engines. Everything stays 2D vector, which is what makes it all procedural.
 
-## Punt de partida
+## Starting point
 
-- Repo: github.com/Azgaar/Fantasy-Map-Generator — llicència MIT (fork, modificació i ús comercial permesos, cal mantenir l'avís de copyright)
-- Stack actual: Vite + TypeScript, tests amb Playwright
-- Arquitectura declarada al README: configuració → generadors → dades del món → renderitzador, amb la capa de dades lliure de lògica i de codi de pintat
+- Repo: github.com/Azgaar/Fantasy-Map-Generator — MIT license (fork, modification, and commercial use allowed, copyright notice must be kept)
+- Current stack: Vite + TypeScript, tests with Playwright
+- Architecture as stated in the README: config → generators → world data → renderer, with the data layer free of logic and drawing code
 
-### Fitxers que importen
+### Files that matter
 
-| Fitxer | Per què |
+| File | Why |
 |---|---|
-| `src/generators/index.ts` | El pipeline ordenat. Geografia primer, política després — aquesta separació és el que fa viable el projecte |
-| `src/generators/states-generator.ts` | ~900 línies. Conté `expandStates()`, el cor de tot |
-| `src/generators/cultures-generator.ts` | Cultures: origen, expansió |
-| `src/generators/burgs-generator.ts` | Assentaments |
-| `src/data/heightmap-templates.ts` | El mini-DSL de terreny (veure secció IA) |
-| `src/generators/states-generator.test.ts` | Xarxa de seguretat per refactoritzar |
+| `src/generators/index.ts` | The ordered pipeline. Geography first, politics after — this separation is what makes the project viable |
+| `src/generators/states-generator.ts` | ~900 lines. Contains `expandStates()`, the heart of it all |
+| `src/generators/cultures-generator.ts` | Cultures: origin, expansion |
+| `src/generators/burgs-generator.ts` | Settlements |
+| `src/data/heightmap-templates.ts` | The terrain mini-DSL (see AI section) |
+| `src/generators/states-generator.test.ts` | Safety net for refactoring |
 
-## Fase 0 — reconeixement (abans de tocar res)
+## Phase 0 — reconnaissance (before touching anything)
 
-- Llegir `states-generator.ts` sencer i explicar com funciona `expandStates()`: quines estructures llegeix, quines escriu, si és idempotent
-- Localitzar on es desa la propietat política per cel·la (`cells.state` o equivalent)
-- Provar de cridar `expandStates()` dues vegades sobre el mateix terreny i veure què es trenca. Hi ha indicis que ja està previst al codi, però cal confirmar-ho
-- Entendre el format `.map` per saber on encabir-hi la seqüència temporal
+- Read `states-generator.ts` in full and explain how `expandStates()` works: what it reads, what it writes, whether it's idempotent
+- Locate where the per-cell political property is stored (`cells.state` or equivalent)
+- Try calling `expandStates()` twice on the same terrain and see what breaks. There are hints this is already accounted for in the code, but it needs confirming
+- Understand the `.map` format to figure out where the temporal sequence fits
 
-Aquesta fase decideix si el pla és viable. No escriure codi nou fins a tenir-la clara.
+This phase decides whether the plan is viable. Don't write new code until it's clear.
 
-## Fase 1 — el generador d'eres (el nucli del projecte)
+## Phase 1 — the era generator (the project's core)
 
-La idea: la geografia es genera un sol cop i es congela. Relleu, rius, costes, biomes són el mateix escenari per a totes les eres. El que varia és només la capa política.
+The idea: geography is generated once and frozen. Relief, rivers, coasts, biomes are the same scenery for every era. What varies is only the political layer.
 
-Cada era es genera cridant els generadors polítics ja existents, però amb condicions inicials heretades de l'era anterior en comptes de llavors aleatòries. Aquesta herència és tot el projecte:
+Each era is generated by calling the existing political generators, but with initial conditions inherited from the previous era instead of random seeds. This inheritance is the whole project:
 
-- Els focus de la nova era neixen preferentment on hi havia poder
-- Les ciutats grans sobreviuen; els assentaments petits desapareixen
-- Camins, ponts i límits de parcel·la persisteixen — són el que més sobreviu a la realitat (el cardo i el decumanus de Barcino encara són carrers de Barcelona)
-- Els edificis singulars es reconverteixen (temple → església → magatzem)
-- Els topònims muten fonèticament en lloc de substituir-se (Barcino → Barcelona, Ilerda → Lleida). Unes quantes regles de canvi de so per cultura i els noms expliquen sols la història de la regió
+- The new era's power centers are born preferentially where power already existed
+- Large cities survive; small settlements disappear
+- Roads, bridges, and plot boundaries persist — they're what survives longest in reality (Barcino's cardo and decumanus are still Barcelona's streets today)
+- Singular buildings are repurposed (temple → church → warehouse)
+- Place names mutate phonetically instead of being replaced (Barcino → Barcelona, Ilerda → Lleida). A handful of sound-change rules per culture, and the names alone tell the region's history
 
-Model mental: estratigrafia. Cada era és una capa dipositada sobre l'anterior, amb regles de què sobreviu i què no.
+Mental model: stratigraphy. Each era is a layer deposited over the previous one, with rules for what survives and what doesn't.
 
-## Fase 2 — la barra de temps
+## Phase 2 — the time bar
 
-Un cop les eres estan precalculades, això és fàcil: el slider només decideix quina capa es dibuixa. Reproducció, pausa, velocitat, i zoom lliure en qualsevol moment.
+Once the eras are precomputed, this is easy: the slider just decides which layer gets drawn. Playback, pause, speed, and free zoom at any moment.
 
-Avís conegut: Azgaar renderitza en SVG i regenerar política triga segons, no mil·lisegons. Per tenir flux continu cal precalcular totes les eres d'una tirada i que el slider només canviï capes. Si no, hi haurà salts.
+Known caveat: Azgaar renders in SVG, and regenerating politics takes seconds, not milliseconds. For smooth playback, all eras need to be precomputed in one pass, with the slider only switching layers. Otherwise there will be jumps.
 
-## Fase 3 — capa d'IA (opcional, després)
+## Phase 3 — AI layer (optional, later)
 
-Troballa clau: Azgaar ja té un DSL per descriure terreny. Format: `eina quantitat alçada rangX rangY`, una instrucció per línia, rangs en % del mapa. Eines: Hill, Range, Trough, Pit, Strait, Add, Multiply, Smooth, Mask.
+Key finding: Azgaar already has a DSL for describing terrain. Format: `tool amount height rangeX rangeY`, one instruction per line, ranges in % of the map. Tools: Hill, Range, Trough, Pit, Strait, Add, Multiply, Smooth, Mask.
 
-Això vol dir que la IA no genera cap mapa — escriu quatre línies de text. "Vull un mar com l'Egeu aquí" es tradueix a instruccions d'aquest DSL. El "aquí" són els rangs de coordenades, que surten d'on l'usuari hagi clicat. El generador determinista fa la resta.
+This means the AI doesn't generate any map — it writes four lines of text. "I want a sea like the Aegean here" translates into instructions in this DSL. The "here" is the coordinate ranges, which come from wherever the user clicked. The deterministic generator does the rest.
 
-Mateix principi per al lore: la IA retorna JSON estructurat amb els camps que el motor d'eres ja espera (cultura d'origen, any de fundació, vigor, agressivitat, relacions), no text lliure. Així s'integra amb la simulació en comptes de quedar com a decoració.
+Same principle for lore: the AI returns structured JSON with the fields the era engine already expects (culture of origin, founding year, vigor, aggressiveness, relations), not free text. That way it integrates with the simulation instead of staying as decoration.
 
-Dues regles innegociables:
+Two non-negotiable rules:
 
-1. Validar sempre la sortida — parsejar, clampar rangs, rebutjar el que no encaixi. Mai executar text del model a cara descoberta
-2. Desar el DSL generat dins del fitxer del mapa — el món ha de seguir sent reproduïble sense tornar a trucar a cap IA. Crític per poder recalcular eres
+1. Always validate the output — parse it, clamp ranges, reject whatever doesn't fit. Never execute model text at face value
+2. Save the generated DSL inside the map file — the world must stay reproducible without calling any AI again. Critical for being able to recompute eras
 
-Distribució: clau d'API pròpia de l'usuari al localStorage, amb selector de proveïdor. Azgaar és 100% client i sense servidor; muntar un backend només per guardar claus canviaria la naturalesa del projecte i faria pagar els tokens de tothom.
+Distribution: the user's own API key in localStorage, with a provider selector. Azgaar is 100% client-side with no server; standing up a backend just to store keys would change the nature of the project and make everyone pay for everyone else's tokens.
 
-## Convencions de treball
+## Working conventions
 
-- Branca `eres`, master net per poder sincronitzar amb l'upstream d'Azgaar
-- Commits petits i sovint
-- Playwright per verificar visualment: generar un món, capturar pantalla, comprovar que cap era surt buida i que les fronteres no es trenquen
-- El servidor de dev (`npm run dev`) obert en paral·lel — les decisions estètiques les pren l'humà mirant el navegador
+- `eras` branch, master kept clean so it can sync with Azgaar's upstream
+- Small, frequent commits
+- Playwright for visual verification: generate a world, take a screenshot, check that no era comes out empty and that borders don't break
+- Dev server (`npm run dev`) open in parallel — aesthetic decisions are made by the human looking at the browser
