@@ -48,6 +48,7 @@ ensureEl("toolsContent").addEventListener("click", event => {
   else if (buttonId === "addRiver") void Controllers.RiverAutoCreator.toggle();
   else if (buttonId === "addRoute") void Controllers.RouteCreator.open();
   else if (buttonId === "addMarker") void Controllers.MarkerCreator.toggle();
+  else if (buttonId === "addAiTerrain") void Controllers.AiTerrain.toggle();
   else if (buttonId === "openSubmapTool") void Controllers.SubmapTool.open();
   else if (buttonId === "openTransformTool") void Controllers.TransformTool.open();
 });

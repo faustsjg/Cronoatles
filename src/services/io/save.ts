@@ -123,6 +123,7 @@ function prepareMapData(): string {
   const rivers = JSON.stringify(pack.rivers);
   const relief = JSON.stringify(pack.relief || []);
   const eras = JSON.stringify(pack.eras || []);
+  const aiTerrainEdits = JSON.stringify(pack.aiTerrainEdits || []);
   const markers = JSON.stringify(pack.markers);
   const cellRoutes = JSON.stringify(pack.cells.routes);
   const routes = JSON.stringify(pack.routes);
@@ -207,7 +208,8 @@ function prepareMapData(): string {
     relief,
     layers,
     graphOverride,
-    eras
+    eras,
+    aiTerrainEdits
   ].join("\r\n");
   return mapData;
 }

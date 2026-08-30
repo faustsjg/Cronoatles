@@ -407,6 +407,7 @@ async function parseLoadedData(data: string[], mapVersion: string | null): Promi
     pack.addedLabels = data[47] ? JSON.parse(data[47]) : [];
     pack.relief = data[49] ? JSON.parse(data[49]) : [];
     pack.eras = data[52] ? JSON.parse(data[52]) : [];
+    pack.aiTerrainEdits = data[53] ? JSON.parse(data[53]) : [];
 
     if (data[31]) {
       const namesDL = data[31].split("/");

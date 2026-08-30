@@ -75,4 +75,5 @@ export interface PackedGraph {
   measurers: Measurer[];
   addedLabels: AddedLabel[];
   eras?: Era[];
+  aiTerrainEdits?: string[];
 }
