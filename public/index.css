@@ -2724,4 +2724,16 @@ body.tour-free-roam * {
     max-width: 100% !important;
     box-sizing: border-box;
   }
+
+  /* Notes Editor sets fixed em-widths on #notesSelect/#notesName as inline
+     styles (12em + 16em side by side), which alone overflow a phone screen
+     even though the dialog itself doesn't visibly clip — found by comparing
+     scrollWidth to clientWidth, not by eyeballing a screenshot */
+  #notesEditor #notesSelect,
+  #notesEditor #notesName {
+    width: 100% !important;
+    display: block;
+    margin: 0.3em 0;
+    box-sizing: border-box;
+  }
 }
