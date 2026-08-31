@@ -2667,6 +2667,18 @@ body.tour-free-roam * {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
   }
 
+  /* showOptions()/hideOptions() (public/modules/ui/options.js) set
+     #regenerate's inline display to "none"/keep #optionsTrigger's inline
+     display in sync with the panel's open state; the !important above,
+     needed to make this FAB reachable on touch (it normally only appears
+     on :hover), otherwise fights that and leaves "New Map!" floating over
+     the open panel's own Reset Zoom button. Deferring to the panel state
+     here, using #optionsTrigger's inline style as the tell, keeps the FAB
+     touch-reachable while closed and out of the way while open. */
+  #optionsTrigger[style*="display: none"] ~ #regenerate {
+    display: none !important;
+  }
+
   #options {
     position: fixed !important;
     left: 0 !important;
@@ -2735,5 +2747,69 @@ body.tour-free-roam * {
     display: block;
     margin: 0.3em 0;
     box-sizing: border-box;
+  }
+
+  /* #sticked (New Map/Export/Save/Load/Reset Zoom) sits outside .tabcontent,
+     as a footer shown under every tab, so it doesn't get the tabcontent
+     button min-height rule above. Measured on a 390px viewport: its buttons
+     rendered at 13px tall, glued to the very bottom edge of the sheet —
+     effectively untappable, not just visually tight. */
+  #sticked {
+    flex-wrap: wrap;
+    gap: 0.5em;
+    padding: 0.6em 0.5em 1em;
+    box-sizing: border-box;
+  }
+
+  #sticked button {
+    min-height: 2.4em;
+    flex: 1 1 auto;
+  }
+
+  /* jQuery UI computes this dialog's own width from its "fit-content"
+     option via internal offset measurements, independently of the
+     .ui-dialog wrapper's width forced above — leaving #iconSelector's own
+     content box wider than the viewport (measured at 425px on a 390px
+     viewport) regardless of what's inside it. Pinning it to a definite,
+     viewport-relative value here (rather than 100%, which would just
+     re-ask the same ambiguous ancestor) removes the ambiguity at its
+     source instead of chasing it downstream. */
+  #iconSelector {
+    width: min(92vw, 360px) !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Icon Selector's emoji table (src/controllers/icon-selector.ts) sets
+     font-size: 2em and width: 100% inline, with 17 columns (ICONS_PER_ROW)
+     — table-layout: auto (the default) treats a specified width as a
+     floor, not a cap, so the table grows past it to fit its content
+     regardless of font-size, and .table's own overflow-x: hidden then
+     silently clips the rightmost columns instead of ever showing them.
+     table-layout: fixed would cap it properly, but its percentage width
+     resolving against this "fit-content" dialog is an indefinite
+     containing block that Chromium mishandles (blows the table up to
+     over a million px) — so instead of fighting the table's own sizing
+     algorithm, make it a horizontally scrollable region: every emoji
+     stays reachable and tappable, just via a swipe instead of a clip. */
+  #iconSelector > div:first-child {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  #iconTable {
+    display: block;
+    width: 100% !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* #imageInput sets a fixed 20em inline width, sitting next to the "Add"
+     button on the same line — together they overflow this narrow dialog
+     and clip the button's own label. */
+  #imageInput {
+    width: 100% !important;
+    display: block;
+    box-sizing: border-box;
+    margin: 0.3em 0;
   }
 }
