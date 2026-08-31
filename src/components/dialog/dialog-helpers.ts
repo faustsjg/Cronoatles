@@ -12,6 +12,12 @@ export function closeDialogs(except = "#except"): void {
         // uninitialized or mid-teardown dialog; skip it so the rest still close
       }
     });
+
+  // Every editor calls this right before opening its own dialog. On a phone
+  // screen the options sheet and the new dialog are both anchored to the
+  // bottom of the viewport, so leaving the sheet open behind the dialog is
+  // pure clutter — collapse it the same way tapping the trigger button would.
+  if (window.matchMedia("(max-width: 640px)").matches) window.hideOptions?.();
 }
 
 interface ConfirmationOptions {
