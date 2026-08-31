@@ -13,9 +13,16 @@ import { findEl, minmax } from "../utils";
 // this window, whatever coordinates it writes into the DSL.
 const CLICK_RADIUS_PERCENT = 12;
 
+// stopMapPlacement() only clears .pressed off buttons inside #addFeature;
+// this button lives in the general Tools list, so it must unpress itself.
+function stop(): void {
+  stopMapPlacement();
+  findEl("addAiTerrain")?.classList.remove("pressed");
+}
+
 function toggle(): void {
   if (findEl("addAiTerrain")?.classList.contains("pressed")) {
-    stopMapPlacement();
+    stop();
     return;
   }
 
@@ -37,7 +44,7 @@ function onMapClick(event: MouseEvent): void {
   const yPercent = (point[1] / graphHeight) * 100;
   const bounds = boundsAroundPoint(xPercent, yPercent);
 
-  stopMapPlacement();
+  stop();
   void Controllers.AiGenerator.open(buildPrompt(bounds), result => onApply(result, bounds));
 }
 

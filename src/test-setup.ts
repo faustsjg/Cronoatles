@@ -3,14 +3,17 @@ if (typeof window === "undefined") {
   (globalThis as Record<string, unknown>).window = globalThis;
 }
 
-// Stub DOM Node so utils/index.ts can patch its prototype without crashing
+// Stub DOM Node so utils/index.ts can patch its prototype without crashing.
+// Must be an actual constructor, not a plain object: Vitest's own matchers
+// (toContain among them) do `instanceof Node` internally to tell a DOM node
+// apart from a string/array/Set, and instanceof throws on a non-callable
+// right-hand side rather than just returning false.
 if (typeof Node === "undefined") {
-  (globalThis as Record<string, unknown>).Node = {
-    prototype: {
-      addEventListener: () => {},
-      removeEventListener: () => {}
-    }
-  };
+  class NodeStub {
+    addEventListener() {}
+    removeEventListener() {}
+  }
+  (globalThis as Record<string, unknown>).Node = NodeStub;
 }
 
 // Stub document so utils/index.ts DOMContentLoaded guard doesn't crash
